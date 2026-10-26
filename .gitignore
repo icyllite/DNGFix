@@ -1,0 +1,12 @@
+# Visual Studio user state
+.vs/
+*.user
+*.suo
+
+# Build output
+/build/
+/Debug/
+/Release/
+/x64/
+/Win32/
+*.ipch
