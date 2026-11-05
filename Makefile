@@ -41,7 +41,7 @@ endif
 CONFIG ?= release
 
 ifeq ($(CONFIG),release)
-CONFIG_CFLAGS := -O2 -g -DNDEBUG
+CONFIG_CFLAGS := -O2 -s -DNDEBUG
 else ifeq ($(CONFIG),debug)
 CONFIG_CFLAGS := -O0 -g3 -DDEBUG
 else
