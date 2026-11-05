@@ -1261,6 +1261,20 @@ int dng_process_file(const wchar_t *src, const wchar_t *output_dir,
         }
     }
 
+    if (p->libraw_verify) {
+        wchar_t info[256];
+        wchar_t verify_err[512];
+
+        if (dng_libraw_verify(dst, info, ARRAYSIZE(info),
+                              verify_err, ARRAYSIZE(verify_err)) != 0) {
+            delete_file_quiet(dst);
+            fail_process(result, log, user,
+                         L"LibRaw verification failed: %s", verify_err);
+            return -1;
+        }
+        log_msg(log, user, 0, DNG_LOG_INFO, L"LibRaw verified: %s", info);
+    }
+
     result->wrote_output = 1;
     wcsncpy_s(result->output_path, ARRAYSIZE(result->output_path),
               dst, _TRUNCATE);

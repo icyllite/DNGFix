@@ -234,6 +234,7 @@ void dng_profile_defaults(DngProfile *p)
     p->fix_illuminants = 1;
     p->fix_version = 1;
     p->verify = 1;
+    p->libraw_verify = 1;
 
     p->calibration_tolerance = 1e-6;
     p->illuminants_require_pairs = 1;
@@ -405,6 +406,8 @@ int dng_profile_load(const wchar_t *path, DngProfile *profile,
     profile->fix_version =
         ini_bool(path, L"fixes", L"version", profile->fix_version);
     profile->verify = ini_bool(path, L"fixes", L"verify", profile->verify);
+    profile->libraw_verify =
+        ini_bool(path, L"fixes", L"libraw_verify", profile->libraw_verify);
 
     profile->calibration_tolerance =
         ini_double(path, L"calibration", L"singular_tolerance",

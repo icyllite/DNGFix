@@ -1,1 +1,6 @@
 /build/
+
+# LibRaw build output
+extern/LibRaw/object/*.o
+extern/LibRaw/lib/*.a
+extern/LibRaw/bin/*.exe

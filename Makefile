@@ -30,6 +30,14 @@ ifeq ($(origin CC),default)
   endif
 endif
 
+ifeq ($(origin CXX),default)
+  ifeq ($(HOST_OS),windows)
+    CXX := g++
+  else
+    CXX := $(TRIPLE)-g++
+  endif
+endif
+
 ifeq ($(origin WINDRES),undefined)
   ifeq ($(HOST_OS),windows)
     WINDRES := windres
@@ -52,7 +60,10 @@ BUILD_DIR ?= build/$(ARCH)/$(CONFIG)
 OBJ_DIR   := $(BUILD_DIR)/obj
 BIN       := $(BUILD_DIR)/DNGFix.exe
 
-SRCS := src/main.c src/dng.c src/profile.c
+LIBRAW_DIR := extern/LibRaw
+LIBRAW_LIB := $(LIBRAW_DIR)/lib/libraw.a
+
+SRCS := src/main.c src/dng.c src/profile.c src/libraw_verify.c
 OBJS := $(patsubst src/%.c,$(OBJ_DIR)/%.o,$(SRCS))
 DEPS := $(OBJS:.o=.d)
 
@@ -70,14 +81,15 @@ GIT_VERSION := unknown
 endif
 
 CPPFLAGS += -DUNICODE -D_UNICODE -D_CRT_SECURE_NO_WARNINGS \
-            -Isrc -I$(OBJ_DIR)
+            -Isrc -I$(OBJ_DIR) -I$(LIBRAW_DIR)
 CFLAGS   += -std=c11 -Wall -Wextra -Wno-unused-parameter -MMD -MP \
             $(CONFIG_CFLAGS)
-LDFLAGS  += -municode -mwindows -static-libgcc
-LDLIBS   += -lcomctl32 -lcomdlg32 -lgdi32 -lshell32 -lole32 -luuid
+LDFLAGS  += -municode -mwindows -static
+LDLIBS   += -lcomctl32 -lcomdlg32 -lgdi32 -lshell32 -lole32 -luuid \
+            -lstdc++ -lws2_32 -lm
 RCFLAGS  += -I src -I res -I $(OBJ_DIR) -DUNICODE -D_UNICODE
 
-.PHONY: all release debug clean distclean run help FORCE
+.PHONY: all release debug clean distclean libraw clean-libraw run help FORCE
 
 all: $(BIN) $(DIST_PROFILES)
 
@@ -111,7 +123,13 @@ $(RES_OBJ): res/DNGFix.rc $(GEN_HEADER) $(wildcard res/*.ico) | $(OBJ_DIR)
 $(MANIFEST_OBJ): $(MANIFEST_RC) res/DNGFix.manifest | $(OBJ_DIR)
 	$(WINDRES) $(RCFLAGS) -i $(MANIFEST_RC) -o $@ -O coff
 
-$(BIN): $(OBJS) $(RES_OBJ) $(MANIFEST_OBJ)
+$(LIBRAW_LIB):
+	$(MAKE) -C $(LIBRAW_DIR) -f Makefile.mingw \
+		CC="$(CC)" CXX="$(CXX)" lib/libraw.a
+
+libraw: $(LIBRAW_LIB)
+
+$(BIN): $(OBJS) $(RES_OBJ) $(MANIFEST_OBJ) $(LIBRAW_LIB)
 	$(CC) $(LDFLAGS) -o $@ $^ $(LDLIBS)
 
 $(BUILD_DIR)/profiles/%: profiles/% | $(BUILD_DIR)/profiles
@@ -123,7 +141,10 @@ $(OBJ_DIR) $(BUILD_DIR)/profiles:
 clean:
 	rm -rf $(BUILD_DIR)
 
-distclean:
+clean-libraw:
+	$(MAKE) -C $(LIBRAW_DIR) -f Makefile.mingw clean
+
+distclean: clean clean-libraw
 	rm -rf build
 
 run: $(BIN)

@@ -28,6 +28,7 @@ typedef struct {
     int fix_illuminants;
     int fix_version;
     int verify;
+    int libraw_verify;
 
     double calibration_tolerance;
 
@@ -66,14 +67,11 @@ typedef struct {
     wchar_t error[512];
 } DngResult;
 
-/* fill a profile with safe generic defaults. */
 void dng_profile_defaults(DngProfile *profile);
 
-/* load one INI profile.  returns 0 on success, -1 on failure. */
 int dng_profile_load(const wchar_t *path, DngProfile *profile,
                      wchar_t *err, size_t err_cch);
 
-/* load every *.ini in a directory.  returns the number loaded (>= 0). */
 int dng_profiles_load_dir(const wchar_t *dir, DngProfile *profiles,
                           int max_profiles, wchar_t *err, size_t err_cch);
 
@@ -84,16 +82,18 @@ int dng_profile_find_best(const DngProfile *profiles, int count,
                           const wchar_t *make, const wchar_t *model,
                           const wchar_t *unique_model);
 
-/* read Make / Model / UniqueCameraModel without modifying anything. */
 int dng_probe(const wchar_t *path,
               wchar_t *make, size_t make_cch,
               wchar_t *model, size_t model_cch,
               wchar_t *unique_model, size_t unique_cch,
               wchar_t *err, size_t err_cch);
 
-/*
- * fix one file.
- */
+// verify a DNG with LibRaw.
+int dng_libraw_verify(const wchar_t *path,
+                      wchar_t *info, size_t info_cch,
+                      wchar_t *err, size_t err_cch);
+
+// fix one file
 int dng_process_file(const wchar_t *src, const wchar_t *output_dir,
                      const DngProfile *profile, int dry_run, int force,
                      DngLogFn log, void *user, DngResult *result);

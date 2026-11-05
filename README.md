@@ -1,3 +1,5 @@
+# DNGFix
+
 TBA
 
-compiles on VS2022+
+compiles on MSYS2 and mingw toolchain on linux
