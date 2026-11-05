@@ -17,7 +17,7 @@
 #include <wchar.h>
 
 #include "dngfix.h"
-#include "Resource.h"
+#include "resource.h"
 #include "git_version.h"
 
 #define APP_TITLE L"DNGFix"

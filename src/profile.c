@@ -189,6 +189,7 @@ static int copy_without_utf8_bom(const wchar_t *src, wchar_t *tmp,
     size_t n;
     int ok = 0;
 
+    (void)tmp_cch;
     if (GetTempPathW(ARRAYSIZE(temp_dir), temp_dir) == 0)
         return 0;
     if (GetTempFileNameW(temp_dir, L"dng", 0, tmp) == 0)
